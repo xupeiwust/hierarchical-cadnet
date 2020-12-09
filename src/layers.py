@@ -108,15 +108,6 @@ class GraphEdgeConvLayer(tf.keras.layers.Layer):
             regularizer=tf.keras.regularizers.l2(self.weight_decay),
             trainable=True,
             name="W_E_3")
-        """
-         self.W_sum = self.add_weight(
-            shape=W_dim,
-            dtype=tf.float32,
-            initializer=tf.keras.initializers.TruncatedNormal(stddev=W_stddev),
-            regularizer=tf.keras.regularizers.l2(self.weight_decay),
-            trainable=True,
-            name="W_sum")       
-        """
 
         self.W_I = self.add_weight(
             shape=W_dim,
@@ -139,9 +130,6 @@ class GraphEdgeConvLayer(tf.keras.layers.Layer):
         n_E_2 = tf.matmul(E_2, V)
         n_E_3 = tf.matmul(E_3, V)
 
-        #n_sum = tf.nn.relu(tf.matmul(n_E_1, self.W_E_1)) + tf.nn.relu(tf.matmul(n_E_2, self.W_E_2)) + tf.nn.relu(tf.matmul(n_E_3, self.W_E_3))
-
-        #output = tf.matmul(n_sum, self.W_sum) + tf.matmul(V, self.W_I) + self.b
         output = tf.matmul(n_E_1, self.W_E_1) + tf.matmul(n_E_2, self.W_E_2) + tf.matmul(n_E_3, self.W_E_3) + \
                  tf.matmul(V, self.W_I) + self.b
         return output
@@ -180,6 +168,64 @@ class GraphEmbeddingLayer(tf.keras.layers.Layer):
 
     def call(self, V, training=None):
         output = tf.matmul(V, self.W) + self.b
+        return output
+
+
+class GraphPoolingLayer(tf.keras.layers.Layer):
+    def __init__(self, num_vertices=1, name="GraphPool", **kwargs):
+        super(GraphPoolingLayer, self).__init__(name=name, **kwargs)
+
+        self.num_vertices = num_vertices
+        self.weight_decay = 0.0005
+        self.W = None
+        self.b = None
+        self.num_features = None
+
+    def build(self, input_shape):
+        V_shape, _ = input_shape
+        self.num_features = V_shape[1]
+        W_dim = [self.num_features, self.num_vertices]
+        b_dim = [self.num_vertices]
+        W_stddev = 1.0 / math.sqrt(self.num_features)
+
+        self.W = self.add_weight(
+            shape=W_dim,
+            dtype=tf.float32,
+            initializer=tf.keras.initializers.TruncatedNormal(stddev=W_stddev),
+            regularizer=tf.keras.regularizers.l2(self.weight_decay),
+            trainable=True,
+            name="weight")
+
+        self.b = self.add_weight(
+            shape=b_dim,
+            dtype=tf.float32,
+            initializer=tf.keras.initializers.Constant(0.1),
+            trainable=True,
+            name="bias")
+
+    def call(self, input, training=None):
+        V, A = input
+        factors = tf.matmul(V, self.W) + self.b
+        factors = tf.nn.softmax(factors)
+        result = tf.matmul(factors, V, transpose_a=True)
+
+        if self.num_vertices == 1:
+            return tf.reshape(result, [-1, self.num_features]), A
+
+        result_A = tf.matmul(A, factors)
+        result_A = tf.matmul(factors, result_A, transpose_a=True)
+
+        return result, result_A
+
+
+class GlobalPoolingLayer(tf.keras.layers.Layer):
+    def __init__(self, name="GlobalPool", **kwargs):
+        super(GlobalPoolingLayer, self).__init__(name=name, **kwargs)
+
+    def call(self, input, training=None):
+        V, I = input
+        output = tf.math.segment_mean(V, I)
+
         return output
 
 

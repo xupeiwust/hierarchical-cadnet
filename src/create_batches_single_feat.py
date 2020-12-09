@@ -85,14 +85,19 @@ def load_dataset_from_h5(file_path, file_name):
     return graphs
 
 
-def add_graph_to_batch(batch, graph_sample):
+def add_graph_to_batch(batch, graph_sample, idx_count):
     if len(batch["V_1"]) == 0:
         for key in batch.keys():
-            batch[key] = graph_sample[key]
+            if key == "labels":
+                label = np.array(np.min(graph_sample[key]), ndmin=1)
+                batch[key] = label
+            elif key == "idx":
+                batch[key] = np.zeros(len(graph_sample["V_1_keys"]))
+            else:
+                batch[key] = graph_sample[key]
 
     else:
         batch["names"] = np.append(batch["names"], graph_sample["names"], axis=0)
-        batch["idx"] = np.append(batch["idx"], graph_sample["idx"], axis=0)
         batch["V_1_keys"] = np.append(batch["V_1_keys"], graph_sample["V_1_keys"], axis=0)
         batch["V_1"] = np.append(batch["V_1"], graph_sample["V_1"], axis=0)
         batch["V_2_keys"] = np.append(batch["V_2_keys"], graph_sample["V_2_keys"], axis=0)
@@ -108,55 +113,36 @@ def add_graph_to_batch(batch, graph_sample):
         batch["E_3"] = disjoint_adj(batch["E_3"], graph_sample["E_3"])
 
         label = np.array(np.min(graph_sample["labels"]), ndmin=1)
+        batch["labels"] = np.append(batch["labels"], [label])
 
-        if label == 24.:
-            print(graph_sample["names"])
-        batch["labels"] = np.concatenate((batch["labels"], label), axis=0)
+        idx = np.full(len(graph_sample["V_1_keys"]), idx_count)
+        batch["idx"] = np.append(batch["idx"], idx, axis=0)
 
     return batch
 
 
-def graph_batch_from_graph_list(graph_list, file_path, file_name):
-    graphs_per_batch = 12
+def graph_batch_from_graph_list(graph_list, file_path, file_name, graphs_per_batch=32):
     graph_counter = 0
     batch_counter = 0
+
+    np.random.shuffle(graph_list)
 
     for graph in graph_list:
         if graph_counter == 0:
             raw_batch = {"names": [], "idx": [], "V_1_keys": [], "V_1": [], "A_1": [], "E_1": [], "E_2": [],
                          "E_3": [], "V_2_keys": [], "V_2": [], "A_2": [], "A_3": [], "A_4": [], "labels": []}
 
-        if graph_counter > graphs_per_batch:
-            graph_counter = 0
+        if graph_counter >= graphs_per_batch:
+            #raw_batch["labels"] = raw_batch["labels"].reshape(graphs_per_batch, 1)
             write_batches_to_file_sparse(batch_counter, raw_batch, file_path, file_name)
+            graph_counter = 0
             batch_counter += 1
 
         else:
-            raw_batch = add_graph_to_batch(raw_batch, graph)
+            raw_batch = add_graph_to_batch(raw_batch, graph, graph_counter)
             graph_counter += 1
 
     #write_batches_to_file_sparse(batch_counter, raw_batch, file_path, file_name)
-
-
-def write_batches_to_file(batch_num, batch, file_path, file_name):
-    path = file_path + file_name + "_norm.h5"
-    hf = h5py.File(path, 'a')
-
-    batch_group = hf.create_group(str(batch_num))
-
-    batch_group.create_dataset("CAD_model", data=batch["names"], compression="gzip", compression_opts=9)
-    batch_group.create_dataset("idx", data=batch["idx"], compression="gzip", compression_opts=9)
-    batch_group.create_dataset("V_1_keys", data=batch["V_1_keys"], compression="gzip", compression_opts=9)
-    batch_group.create_dataset("V_1", data=batch["V_1"])
-    batch_group.create_dataset("A_1", data=batch["A_1"], compression="lzf")
-    batch_group.create_dataset("V_2_keys", data=batch["V_2_keys"], compression="gzip", compression_opts=9)
-    batch_group.create_dataset("V_2", data=batch["V_2"])
-    batch_group.create_dataset("A_2", data=batch["A_2"], compression="lzf")
-    batch_group.create_dataset("A_3", data=batch["A_3"], compression="lzf")
-    batch_group.create_dataset("A_4", data=batch["A_4"], compression="lzf")
-    batch_group.create_dataset("labels", data=batch["labels"])
-
-    hf.close()
 
 
 def get_sparse_tensor_info(matrix, default_val):
@@ -222,21 +208,24 @@ def write_batches_to_file_sparse(batch_num, batch, file_path, file_name):
 
 
 if __name__ == '__main__':
-    f_path = "/home/mlg/Documents/Andrew/Hierarchical-GCNN/hiergcn/data/Single_Feature_70_15_15/"
+    f_path = "/home/mlg/Documents/Andrew/hierarchical-cadnet/data/Single_Feature_70_15_15/"
 
-    """
     print("Processing Training Set")
     f_name = "train"
     graph_list = load_dataset_from_h5(f_path, f_name)
-    graph_batch_from_graph_list(graph_list, f_path, f_name)
-
+    graph_batch_from_graph_list(graph_list, f_path, f_name, graphs_per_batch=64)
+    """
     print("Processing Validation Set")
     f_name = "val"
     graph_list = load_dataset_from_h5(f_path, f_name)
     graph_batch_from_graph_list(graph_list, f_path, f_name)    
     """
-
-    print("Processing Test Set")
+    """
+        print("Processing Test Set")
     f_name = "test"
     graph_list = load_dataset_from_h5(f_path, f_name)
-    graph_batch_from_graph_list(graph_list, f_path, f_name)
+    graph_batch_from_graph_list(graph_list, f_path, f_name, graphs_per_batch=32)
+    """
+
+
+

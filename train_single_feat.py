@@ -1,7 +1,7 @@
 import tensorflow as tf
 import datetime as dt
 from src.network_single_feat import HierarchicalGCNN as HierGCNN
-from src.helper import dataloader_edge_sparse
+from src.helper import dataloader_single_feat as dataloader
 
 
 def train_step(x, y):
@@ -28,24 +28,20 @@ def val_step(x, y):
 if __name__ == '__main__':
     import time
 
-    data_type = "mixed"
-    if data_type == "planar":
-        num_classes = 16
-    else:
-        print("mixed")
-        num_classes = 25
+    num_classes = 25
+    batch_size = 32
 
     units = 512
-    num_epochs = 100
+    num_epochs = 40
     learning_rate = 1e-2
     dropout_rate = 0.3
     decay_rate = learning_rate / num_epochs
     lr_schedule = tf.keras.optimizers.schedules.ExponentialDecay(learning_rate,
                                                                  decay_steps=100000, decay_rate=decay_rate)
 
-    save_name = f'single_{data_type}_units_{units}_date_{dt.datetime.now().strftime("%Y-%m-%d")}'
+    save_name = f'mean_single_units_{units}_date_{dt.datetime.now().strftime("%Y-%m-%d")}'
 
-    model = HierGCNN(units=units, rate=dropout_rate, num_classes=num_classes)
+    model = HierGCNN(units=units, rate=dropout_rate, num_classes=num_classes, batch_size=batch_size)
 
     loss_fn = tf.keras.losses.CategoricalCrossentropy()
     optimizer = tf.keras.optimizers.Adam(learning_rate=lr_schedule)
@@ -53,9 +49,9 @@ if __name__ == '__main__':
     summary_writer = tf.summary.create_file_writer(f'./single_log/{save_name}')
 
     train_loss_metric = tf.keras.metrics.Mean()
-    train_acc_metric = tf.keras.metrics.Accuracy()
+    train_acc_metric = tf.keras.metrics.CategoricalAccuracy()
     val_loss_metric = tf.keras.metrics.Mean()
-    val_acc_metric = tf.keras.metrics.Accuracy()
+    val_acc_metric = tf.keras.metrics.CategoricalAccuracy()
 
     min_val_loss = 0.0
     min_train_loss = 0.0
@@ -67,17 +63,16 @@ if __name__ == '__main__':
         print(f"Epoch {epoch + 1} of {num_epochs}")
         start_time = time.time()
 
-        train_dataloader = dataloader_edge_sparse("data/Single_Feature_70_15_15/test_sparse.h5")
-        #val_dataloader = dataloader_edge_sparse("data/Single_Feature_70_15_15/val_sparse.h5")
+        train_dataloader = dataloader("data/Single_Feature_70_15_15/train_sparse.h5")
+        #val_dataloader = dataloader("data/Single_Feature_70_15_15/val_sparse.h5")
 
         with summary_writer.as_default():
             for step, (x_batch_train, y_batch_train) in enumerate(train_dataloader):
-                #one_hot_y = tf.one_hot(y_batch_train, depth=num_classes)
-                print(tf.shape(y_batch_train))
-                train_step(x_batch_train, y_batch_train)
+                one_hot_y = tf.one_hot(y_batch_train, depth=num_classes, axis=-1)
+                train_step(x_batch_train, one_hot_y)
 
-                # Log every 20 batches.
-                if step % 20 == 0:
+                # Log every 100 batches.
+                if step % 100 == 0:
                     print(
                         "Training loss (for one batch) at step %d: %.4f"
                         % (step, float(train_loss_metric.result()))

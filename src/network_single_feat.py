@@ -3,7 +3,7 @@ from src.layers import *
 
 class HierarchicalGCNN(tf.keras.Model):
 
-    def __init__(self, units, rate, num_classes, num_layers=5):
+    def __init__(self, units, rate, num_classes, batch_size, num_layers=5):
         super(HierarchicalGCNN, self).__init__()
         self.num_layers = num_layers
         # Labelling Code: nnlayer_level_block
@@ -35,13 +35,14 @@ class HierarchicalGCNN(tf.keras.Model):
         self.bn_a4 = tf.keras.layers.BatchNormalization(name="BN_A4")
 
         # Level 1 - Final (Block 5)
-        self.ge_final = GraphEmbeddingLayer(filters=1, name="GE_final")
+        self.ge_final = GraphEmbeddingLayer(filters=num_classes, name="GE_final")
+        self.pooling = GlobalPoolingLayer(name="Pooling")
         self.flatten = tf.keras.layers.Flatten()
-        self.dense = tf.keras.layers.Dense(24, activation="relu")
+        self.dense = tf.keras.layers.Dense(num_classes, activation="relu")
         self.softmax = tf.keras.layers.Softmax()
 
     def call(self, inputs, training=False):
-        V_1, E_1, E_2, E_3, V_2, A_2, A_3, A_4 = inputs
+        V_1, E_1, E_2, E_3, V_2, A_2, A_3, A_4, I_1 = inputs
 
         x_1 = self.ge_start(V_1)
         x_1 = self.bn_start(x_1, training=training)
@@ -90,11 +91,9 @@ class HierarchicalGCNN(tf.keras.Model):
 
         # Final 0-hop layer
         x = self.ge_final(x_1)
-
-        x = tf.reshape(x, [1, -1])
-        print("Reshape: ", tf.shape(x))
-        x = self.dense(x)
-        print("Dense: ", tf.shape(x))
+        #print("Final: ", tf.shape(x))
+        x = self.pooling([x, I_1])
+        #print("Pooling: ", tf.shape(x))
         x = self.softmax(x)
 
         return x
