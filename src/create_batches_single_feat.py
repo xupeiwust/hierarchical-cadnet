@@ -91,8 +91,10 @@ def add_graph_to_batch(batch, graph_sample, idx_count):
             if key == "labels":
                 label = np.array(np.min(graph_sample[key]), ndmin=1)
                 batch[key] = label
-            elif key == "idx":
+            elif key == "V_1_idx":
                 batch[key] = np.zeros(len(graph_sample["V_1_keys"]))
+            elif key == "V_2_idx":
+                batch[key] = np.zeros(len(graph_sample["V_2_keys"]))
             else:
                 batch[key] = graph_sample[key]
 
@@ -115,8 +117,11 @@ def add_graph_to_batch(batch, graph_sample, idx_count):
         label = np.array(np.min(graph_sample["labels"]), ndmin=1)
         batch["labels"] = np.append(batch["labels"], [label])
 
-        idx = np.full(len(graph_sample["V_1_keys"]), idx_count)
-        batch["idx"] = np.append(batch["idx"], idx, axis=0)
+        V_1_idx = np.full(len(graph_sample["V_1_keys"]), idx_count)
+        batch["V_1_idx"] = np.append(batch["V_1_idx"], V_1_idx, axis=0)
+
+        V_2_idx = np.full(len(graph_sample["V_2_keys"]), idx_count)
+        batch["V_2_idx"] = np.append(batch["V_2_idx"], V_2_idx, axis=0)
 
     return batch
 
@@ -129,11 +134,11 @@ def graph_batch_from_graph_list(graph_list, file_path, file_name, graphs_per_bat
 
     for graph in graph_list:
         if graph_counter == 0:
-            raw_batch = {"names": [], "idx": [], "V_1_keys": [], "V_1": [], "A_1": [], "E_1": [], "E_2": [],
-                         "E_3": [], "V_2_keys": [], "V_2": [], "A_2": [], "A_3": [], "A_4": [], "labels": []}
+            raw_batch = {"names": [], "V_1_idx": [], "V_1_keys": [], "V_1": [], "A_1": [], "E_1": [], "E_2": [],
+                         "E_3": [], "V_2_idx": [], "V_2_keys": [], "V_2": [], "A_2": [], "A_3": [], "A_4": [],
+                         "labels": []}
 
         if graph_counter >= graphs_per_batch:
-            #raw_batch["labels"] = raw_batch["labels"].reshape(graphs_per_batch, 1)
             write_batches_to_file_sparse(batch_counter, raw_batch, file_path, file_name)
             graph_counter = 0
             batch_counter += 1
@@ -173,8 +178,8 @@ def write_batches_to_file_sparse(batch_num, batch, file_path, file_name):
     batch_group = hf.create_group(str(batch_num))
 
     batch_group.create_dataset("CAD_model", data=batch["names"], compression="gzip", compression_opts=9)
-    batch_group.create_dataset("idx", data=batch["idx"], compression="gzip", compression_opts=9)
     batch_group.create_dataset("V_1_keys", data=batch["V_1_keys"], compression="gzip", compression_opts=9)
+    batch_group.create_dataset("V_1_idx", data=batch["V_1_idx"])
     batch_group.create_dataset("V_1", data=batch["V_1"])
 
     batch_group.create_dataset("A_1_idx", data=A_1_data[0])
@@ -192,6 +197,7 @@ def write_batches_to_file_sparse(batch_num, batch, file_path, file_name):
     batch_group.create_dataset("E_3_shape", data=E_3_data[2])
 
     batch_group.create_dataset("V_2_keys", data=batch["V_2_keys"], compression="gzip", compression_opts=9)
+    batch_group.create_dataset("V_2_idx", data=batch["V_2_idx"])
     batch_group.create_dataset("V_2", data=batch["V_2"])
     batch_group.create_dataset("A_2_idx", data=A_2_data[0])
     batch_group.create_dataset("A_2_values", data=A_2_data[1])
@@ -214,18 +220,13 @@ if __name__ == '__main__':
     f_name = "train"
     graph_list = load_dataset_from_h5(f_path, f_name)
     graph_batch_from_graph_list(graph_list, f_path, f_name, graphs_per_batch=64)
-    """
+
     print("Processing Validation Set")
     f_name = "val"
     graph_list = load_dataset_from_h5(f_path, f_name)
     graph_batch_from_graph_list(graph_list, f_path, f_name)    
-    """
-    """
-        print("Processing Test Set")
+
+    print("Processing Test Set")
     f_name = "test"
     graph_list = load_dataset_from_h5(f_path, f_name)
-    graph_batch_from_graph_list(graph_list, f_path, f_name, graphs_per_batch=32)
-    """
-
-
-
+    graph_batch_from_graph_list(graph_list, f_path, f_name, graphs_per_batch=64)

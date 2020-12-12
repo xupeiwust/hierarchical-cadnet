@@ -3,7 +3,7 @@ from src.layers import *
 
 class HierarchicalGCNN(tf.keras.Model):
 
-    def __init__(self, units, rate, num_classes, batch_size, num_layers=5):
+    def __init__(self, units, rate, num_classes, batch_size, num_layers=7):
         super(HierarchicalGCNN, self).__init__()
         self.num_layers = num_layers
         # Labelling Code: nnlayer_level_block
@@ -91,9 +91,7 @@ class HierarchicalGCNN(tf.keras.Model):
 
         # Final 0-hop layer
         x = self.ge_final(x_1)
-        #print("Final: ", tf.shape(x))
         x = self.pooling([x, I_1])
-        #print("Pooling: ", tf.shape(x))
         x = self.softmax(x)
 
         return x

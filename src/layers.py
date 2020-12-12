@@ -182,7 +182,7 @@ class GraphPoolingLayer(tf.keras.layers.Layer):
         self.num_features = None
 
     def build(self, input_shape):
-        V_shape, _ = input_shape
+        V_shape = input_shape
         self.num_features = V_shape[1]
         W_dim = [self.num_features, self.num_vertices]
         b_dim = [self.num_vertices]
@@ -204,18 +204,18 @@ class GraphPoolingLayer(tf.keras.layers.Layer):
             name="bias")
 
     def call(self, input, training=None):
-        V, A = input
+        V = input
         factors = tf.matmul(V, self.W) + self.b
         factors = tf.nn.softmax(factors)
         result = tf.matmul(factors, V, transpose_a=True)
 
         if self.num_vertices == 1:
-            return tf.reshape(result, [-1, self.num_features]), A
+            return tf.reshape(result, [-1, self.num_features])
 
-        result_A = tf.matmul(A, factors)
-        result_A = tf.matmul(factors, result_A, transpose_a=True)
+        #result_A = tf.matmul(A, factors)
+        #result_A = tf.matmul(factors, result_A, transpose_a=True)
 
-        return result, result_A
+        return result
 
 
 class GlobalPoolingLayer(tf.keras.layers.Layer):

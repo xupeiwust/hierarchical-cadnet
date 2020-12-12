@@ -129,6 +129,7 @@ def load_face_facet_link(base_path, brep_keys, facet_keys):
 def get_split(directory, split):
     sub_dirs = [f.path for f in os.scandir(directory) if f.is_dir()]
     random.shuffle(sub_dirs)
+    random.shuffle(sub_dirs)
     num_dirs = len(sub_dirs)
     
     train_split = int(math.ceil(num_dirs * split["train"]))

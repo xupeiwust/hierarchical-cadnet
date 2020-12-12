@@ -170,7 +170,7 @@ def dataloader_single_feat(file_path):
         A_4 = tf.Variable(tf.sparse.to_dense(A_4_sparse, default_value=0.), dtype=tf.dtypes.float32, name="A_4")
 
         #V1_idxs = np.array(group.get("keys"), dtype=np.int16)[:, 0]
-        I_1 = tf.Variable(np.array(group.get("idx")), dtype=tf.dtypes.int32, name="I_1")
+        I_1 = tf.Variable(np.array(group.get("V_1_idx")), dtype=tf.dtypes.int32, name="I_1")
 
         yield [V_1, E_1, E_2, E_3, V_2, A_2, A_3, A_4, I_1], labels
 

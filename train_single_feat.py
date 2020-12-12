@@ -28,11 +28,11 @@ def val_step(x, y):
 if __name__ == '__main__':
     import time
 
-    num_classes = 25
-    batch_size = 32
+    num_classes = 24
+    batch_size = 64
 
     units = 512
-    num_epochs = 40
+    num_epochs = 100
     learning_rate = 1e-2
     dropout_rate = 0.3
     decay_rate = learning_rate / num_epochs
@@ -46,7 +46,7 @@ if __name__ == '__main__':
     loss_fn = tf.keras.losses.CategoricalCrossentropy()
     optimizer = tf.keras.optimizers.Adam(learning_rate=lr_schedule)
 
-    summary_writer = tf.summary.create_file_writer(f'./single_log/{save_name}')
+    summary_writer = tf.summary.create_file_writer(f'./log/{save_name}')
 
     train_loss_metric = tf.keras.metrics.Mean()
     train_acc_metric = tf.keras.metrics.CategoricalAccuracy()
@@ -64,7 +64,7 @@ if __name__ == '__main__':
         start_time = time.time()
 
         train_dataloader = dataloader("data/Single_Feature_70_15_15/train_sparse.h5")
-        #val_dataloader = dataloader("data/Single_Feature_70_15_15/val_sparse.h5")
+        val_dataloader = dataloader("data/Single_Feature_70_15_15/val_sparse.h5")
 
         with summary_writer.as_default():
             for step, (x_batch_train, y_batch_train) in enumerate(train_dataloader):
@@ -89,8 +89,6 @@ if __name__ == '__main__':
 
             print(f"Train loss={train_loss}, Train acc={train_acc}")
 
-
-            """
             for x_batch_val, y_batch_val in val_dataloader:
                 one_hot_y = tf.one_hot(y_batch_val, depth=num_classes)
                 val_step(x_batch_val, one_hot_y)
@@ -103,7 +101,7 @@ if __name__ == '__main__':
                 min_train_loss = float(train_loss)
                 max_train_acc = float(train_acc)
                 max_val_acc = float(val_acc)
-                #model.save_weights(f"checkpoint/{save_name}.ckpt")
+                model.save_weights(f"checkpoint/{save_name}.ckpt")
                 max_epoch = epoch
 
             tf.summary.scalar('val_loss', val_loss, step=optimizer.iterations)
@@ -112,11 +110,11 @@ if __name__ == '__main__':
             val_loss_metric.reset_states()
             val_acc_metric.reset_states()
 
-            print(f"Val loss={val_loss}, Val acc={val_acc}")            
-            """
+            print(f"Val loss={val_loss}, Val acc={val_acc}")
 
             print("Time taken: %.2fs" % (time.time() - start_time))
 
-    print(f"Epoch={max_epoch+1}, Max train acc={max_train_acc}")
-    #print(f"Epoch={max_epoch + 1}, Max train acc={max_train_acc}, Max val acc={max_val_acc}")
-    #print(f"Train loss={min_train_loss}, Val loss={min_val_loss}")
+
+    #print(f"Epoch={max_epoch+1}, Max train acc={max_train_acc}")
+    print(f"Epoch={max_epoch + 1}, Max train acc={max_train_acc}, Max val acc={max_val_acc}")
+    print(f"Train loss={min_train_loss}, Val loss={min_val_loss}")
