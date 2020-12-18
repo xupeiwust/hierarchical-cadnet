@@ -46,14 +46,13 @@ if __name__ == '__main__':
     lr_schedule = tf.keras.optimizers.schedules.ExponentialDecay(learning_rate,
                                                                  decay_steps=100000, decay_rate=decay_rate)
 
-    save_name = f'residual_{data_type}_units_{units}_date_{dt.datetime.now().strftime("%Y-%m-%d")}'
+    save_name = f'residual_lvl_8_{data_type}_units_{units}_date_{dt.datetime.now().strftime("%Y-%m-%d")}'
 
     model = HierGCNN(units=units, rate=dropout_rate, num_classes=num_classes)
     #model.load_weights("checkpoint/residual_planar_planar_units_512_date_2020-11-11.ckpt")
 
     loss_fn = tf.keras.losses.CategoricalCrossentropy()
     optimizer = tf.keras.optimizers.Adam(learning_rate=lr_schedule)
-    #summary_writer = tf.summary.create_file_writer('./log/{}'.format(dt.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")))
     summary_writer = tf.summary.create_file_writer(f'./log/{save_name}')
 
     train_loss_metric = tf.keras.metrics.Mean()
@@ -75,8 +74,8 @@ if __name__ == '__main__':
         print(f"Epoch {epoch + 1} of {num_epochs}")
         start_time = time.time()
 
-        train_dataloader = dataloader_edge_sparse("data/Single_Feature_70_15_15/train_sparse.h5")
-        val_dataloader = dataloader_edge_sparse("data/Single_Feature_70_15_15/val_sparse.h5")
+        train_dataloader = dataloader_edge_sparse("data/Mixed_70_15_15/train_sparse.h5")
+        val_dataloader = dataloader_edge_sparse("data/Mixed_70_15_15/val_sparse.h5")
 
         with summary_writer.as_default():
             for step, (x_batch_train, y_batch_train) in enumerate(train_dataloader):
@@ -121,9 +120,6 @@ if __name__ == '__main__':
                 max_val_miou = float(val_miou)
                 model.save_weights(f"checkpoint/{save_name}.ckpt")
                 max_epoch = epoch
-
-            if val_miou > max_val_miou:
-                model.save_weights(f"checkpoint/{save_name}_miou.ckpt")
 
             tf.summary.scalar('val_loss', val_loss, step=optimizer.iterations)
             tf.summary.scalar('val_acc', val_acc, step=optimizer.iterations)

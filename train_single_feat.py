@@ -39,9 +39,9 @@ if __name__ == '__main__':
     lr_schedule = tf.keras.optimizers.schedules.ExponentialDecay(learning_rate,
                                                                  decay_steps=100000, decay_rate=decay_rate)
 
-    save_name = f'mean_single_units_{units}_date_{dt.datetime.now().strftime("%Y-%m-%d")}'
+    save_name = f'lvl_7_adj_single_units_{units}_date_{dt.datetime.now().strftime("%Y-%m-%d")}'
 
-    model = HierGCNN(units=units, rate=dropout_rate, num_classes=num_classes, batch_size=batch_size)
+    model = HierGCNN(units=units, rate=dropout_rate, num_classes=num_classes)
 
     loss_fn = tf.keras.losses.CategoricalCrossentropy()
     optimizer = tf.keras.optimizers.Adam(learning_rate=lr_schedule)
@@ -114,7 +114,5 @@ if __name__ == '__main__':
 
             print("Time taken: %.2fs" % (time.time() - start_time))
 
-
-    #print(f"Epoch={max_epoch+1}, Max train acc={max_train_acc}")
     print(f"Epoch={max_epoch + 1}, Max train acc={max_train_acc}, Max val acc={max_val_acc}")
     print(f"Train loss={min_train_loss}, Val loss={min_val_loss}")

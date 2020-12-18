@@ -12,7 +12,7 @@ class HierarchicalGCNN(tf.keras.Model):
         self.dp_start = tf.keras.layers.Dropout(rate=rate, name="DP_start")
 
         for i in range(1, self.num_layers + 1):
-            setattr(self, f"gcnn_1_{i}", GraphEdgeConvLayer(filters=units, name=f"GCNN_1_{i}"))
+            setattr(self, f"gcnn_1_{i}", GraphCNNLayer(filters=units, name=f"GCNN_1_{i}"))
             setattr(self, f"bn_1_{i}", tf.keras.layers.BatchNormalization(name=f"BN_1_{i}"))
             setattr(self, f"dp_1_{i}", tf.keras.layers.Dropout(rate=rate, name=f"DP_1_{i}"))
 
@@ -39,7 +39,7 @@ class HierarchicalGCNN(tf.keras.Model):
         self.softmax = tf.keras.layers.Softmax()
 
     def call(self, inputs, training=False):
-        V_1, E_1, E_2, E_3, V_2, A_2, A_3, A_4 = inputs
+        V_1, A_1, V_2, A_2, A_3, A_4 = inputs
 
         x_1 = self.ge_start(V_1)
         x_1 = self.bn_start(x_1, training=training)
@@ -75,7 +75,7 @@ class HierarchicalGCNN(tf.keras.Model):
         x_1 += a_3
 
         for i in range(1, self.num_layers + 1):
-            r_1 = getattr(self, f"gcnn_1_{i}")([x_1, E_1, E_2, E_3])
+            r_1 = getattr(self, f"gcnn_1_{i}")([x_1, A_1])
             r_1 = getattr(self, f"bn_1_{i}")(r_1, training=training)
             r_1 = tf.nn.relu(r_1)
             r_1 = getattr(self, f"dp_1_{i}")(r_1, training=training)

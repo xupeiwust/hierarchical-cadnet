@@ -151,6 +151,14 @@ def dataloader_single_feat(file_path):
         E_3_sparse = tf.SparseTensor(E_3_idx, E_3_values, E_3_shape)
         E_3 = tf.Variable(tf.sparse.to_dense(E_3_sparse, default_value=0.), dtype=tf.dtypes.float32, name="E_3")
 
+        """
+        A_1_idx = np.array(group.get("A_1_idx"))
+        A_1_values = np.array(group.get("A_1_values"))
+        A_1_shape = np.array(group.get("A_1_shape"))
+        A_1_sparse = tf.SparseTensor(A_1_idx, A_1_values, A_1_shape)
+        A_1 = tf.Variable(tf.sparse.to_dense(A_1_sparse, default_value=0.), dtype=tf.dtypes.float32, name="A_1")        
+        """
+
         A_2_idx = np.array(group.get("A_2_idx"))
         A_2_values = np.array(group.get("A_2_values"))
         A_2_shape = np.array(group.get("A_2_shape"))
@@ -169,7 +177,6 @@ def dataloader_single_feat(file_path):
         A_4_sparse = tf.SparseTensor(A_4_idx, A_4_values, A_4_shape)
         A_4 = tf.Variable(tf.sparse.to_dense(A_4_sparse, default_value=0.), dtype=tf.dtypes.float32, name="A_4")
 
-        #V1_idxs = np.array(group.get("keys"), dtype=np.int16)[:, 0]
         I_1 = tf.Variable(np.array(group.get("V_1_idx")), dtype=tf.dtypes.int32, name="I_1")
 
         yield [V_1, E_1, E_2, E_3, V_2, A_2, A_3, A_4, I_1], labels

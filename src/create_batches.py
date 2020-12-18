@@ -111,8 +111,7 @@ def add_graph_to_batch(batch, graph_sample):
     return batch
 
 
-def graph_batch_from_graph_list(graph_list, file_path, file_name):
-    total_nodes_per_batch = 15000
+def graph_batch_from_graph_list(graph_list, file_path, file_name, nodes_per_batch=10000):
     node_counter = 0
     batch_counter = 0
 
@@ -123,7 +122,7 @@ def graph_batch_from_graph_list(graph_list, file_path, file_name):
 
         node_counter += len(graph["V_1"]) + len(graph["V_2"])
 
-        if node_counter > total_nodes_per_batch:
+        if node_counter >= nodes_per_batch:
             node_counter = 0
             write_batches_to_file_sparse(batch_counter, raw_batch, file_path, file_name)
             batch_counter += 1
@@ -218,19 +217,27 @@ def write_batches_to_file_sparse(batch_num, batch, file_path, file_name):
 
 
 if __name__ == '__main__':
-    f_path = "/home/mlg/Documents/Andrew/Hierarchical-GCNN/hiergcn/data/"
+    import os
+
+    # Parameters
+    data_dir = "Mixed_70_15_15"
+    max_num_nodes_per_batch = 10000
+
+    current_dir_path = os.path.dirname(os.path.realpath(__file__))
+    base_dir_path = os.path.dirname(current_dir_path)
+    data_dir_path = os.path.join(base_dir_path, "data", data_dir) + "/"
 
     print("Processing Training Set")
     f_name = "train"
-    graph_list = load_dataset_from_h5(f_path, f_name)
-    graph_batch_from_graph_list(graph_list, f_path, f_name)
+    graph_list = load_dataset_from_h5(data_dir_path, f_name)
+    graph_batch_from_graph_list(graph_list, data_dir_path, f_name, max_num_nodes_per_batch)
 
     print("Processing Validation Set")
     f_name = "val"
-    graph_list = load_dataset_from_h5(f_path, f_name)
-    graph_batch_from_graph_list(graph_list, f_path, f_name)
+    graph_list = load_dataset_from_h5(data_dir_path, f_name)
+    graph_batch_from_graph_list(graph_list, data_dir_path, f_name, max_num_nodes_per_batch)
 
     print("Processing Test Set")
     f_name = "test"
-    graph_list = load_dataset_from_h5(f_path, f_name)
-    graph_batch_from_graph_list(graph_list, f_path, f_name)
+    graph_list = load_dataset_from_h5(data_dir_path, f_name)
+    graph_batch_from_graph_list(graph_list, data_dir_path, f_name, max_num_nodes_per_batch)

@@ -44,7 +44,7 @@ def analysis_report_planar(y_true, y_pred):
 
 
 if __name__ == '__main__':
-    num_classes = 24
+    num_classes = 25
     units = 512
     num_epochs = 100
     learning_rate = 1e-2
@@ -65,8 +65,8 @@ if __name__ == '__main__':
     test_recall_metric = tf.keras.metrics.Recall()
     test_iou_metric = tf.keras.metrics.MeanIoU(num_classes=num_classes)
 
-    model.load_weights("checkpoint/residual_planar_mixed_units_512_date_2020-11-11.ckpt")
-    test_dataloader = dataloader_edge_sparse("data/test_70_15_15_mixed_sparse.h5")
+    model.load_weights("checkpoint/mixed_units_512_date_2020-12-17.ckpt")
+    test_dataloader = dataloader_edge_sparse("data/Mixed_70_15_15/test_sparse.h5")
 
     y_true_total = []
     y_pred_total = []
