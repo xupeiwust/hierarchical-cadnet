@@ -14,26 +14,7 @@ class GraphCNNGlobal(object):
     GRAPHCNN_I_FACTOR = 1.0
 
 
-def h5_dataloader(file_path):
-    hf = h5py.File(file_path, 'r')
-
-    for key in list(hf.keys()):
-        group = hf.get(key)
-
-        V_1 = tf.Variable(np.array(group.get("V_1"), dtype=np.float32), dtype=tf.float32, name="V_1")
-        A_1 = tf.Variable(np.array(group.get("A_1"), dtype=np.float32), dtype=tf.float32, name="A_1")
-        V_2 = tf.Variable(np.array(group.get("V_2"), dtype=np.float32), dtype=tf.float32, name="V_2")
-        A_2 = tf.Variable(np.array(group.get("A_2"), dtype=np.float32), dtype=tf.float32, name="A_2")
-        A_3 = tf.Variable(np.array(group.get("A_3"), dtype=np.float32), dtype=tf.float32, name="A_3")
-        A_4 = tf.Variable(np.array(group.get("A_4"), dtype=np.float32), dtype=tf.float32, name="A_4")
-        labels = np.array(group.get("labels"), dtype=np.int8)
-
-        yield [V_1, A_1, V_2, A_2, A_3, A_4], labels
-
-    hf.close()
-
-
-def dataloader_sparse(file_path):
+def dataloader_adj(file_path):
     hf = h5py.File(file_path, 'r')
 
     for key in list(hf.keys()):
@@ -72,7 +53,7 @@ def dataloader_sparse(file_path):
     hf.close()
 
 
-def dataloader_edge_sparse(file_path):
+def dataloader_edge(file_path):
     hf = h5py.File(file_path, 'r')
 
     for key in list(hf.keys()):

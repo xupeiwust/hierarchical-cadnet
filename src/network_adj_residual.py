@@ -3,7 +3,7 @@ from src.layers import *
 
 class HierarchicalGCNN(tf.keras.Model):
 
-    def __init__(self, units, rate, num_classes, num_layers=8):
+    def __init__(self, units, rate, num_classes, num_layers=7):
         super(HierarchicalGCNN, self).__init__()
         self.num_layers = num_layers
         # Labelling Code: nnlayer_level_block
