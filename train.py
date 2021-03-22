@@ -31,7 +31,7 @@ def val_step(x, y):
 if __name__ == '__main__':
     import time
 
-    data_type = "planar"
+    data_type = "mixed"
     if data_type == "planar":
         num_classes = 16
     else:
@@ -46,7 +46,7 @@ if __name__ == '__main__':
     lr_schedule = tf.keras.optimizers.schedules.ExponentialDecay(learning_rate,
                                                                  decay_steps=100000, decay_rate=decay_rate)
 
-    save_name = f'residual_lvl_7_edge_{data_type}_units_{units}_date_{dt.datetime.now().strftime("%Y-%m-%d")}'
+    save_name = f'residual_lvl_7_adj_{data_type}_units_{units}_date_{dt.datetime.now().strftime("%Y-%m-%d")}'
 
     model = HierGCNN(units=units, rate=dropout_rate, num_classes=num_classes, num_layers=7)
     #model.load_weights("checkpoint/residual_planar_planar_units_512_date_2020-11-11.ckpt")
@@ -74,8 +74,8 @@ if __name__ == '__main__':
         print(f"Epoch {epoch + 1} of {num_epochs}")
         start_time = time.time()
 
-        train_dataloader = dataloader("data/Planar_70_15_15/train_sparse.h5")
-        val_dataloader = dataloader("data/Planar_70_15_15/val_sparse.h5")
+        train_dataloader = dataloader("data/Mixed_70_15_15/train_sparse.h5")
+        val_dataloader = dataloader("data/Mixed_70_15_15/val_sparse.h5")
 
         with summary_writer.as_default():
             for step, (x_batch_train, y_batch_train) in enumerate(train_dataloader):

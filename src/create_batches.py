@@ -220,22 +220,22 @@ if __name__ == '__main__':
     import os
 
     # Parameters
-    data_dir = "Mixed_70_15_15"
+    data_dir = "Mixed_Complex"
     max_num_nodes_per_batch = 10000
 
     current_dir_path = os.path.dirname(os.path.realpath(__file__))
     base_dir_path = os.path.dirname(current_dir_path)
     data_dir_path = os.path.join(base_dir_path, "data", data_dir) + "/"
 
-    print("Processing Training Set")
-    f_name = "train"
-    graph_list = load_dataset_from_h5(data_dir_path, f_name)
-    graph_batch_from_graph_list(graph_list, data_dir_path, f_name, max_num_nodes_per_batch)
+    #print("Processing Training Set")
+    #f_name = "train"
+    #graph_list = load_dataset_from_h5(data_dir_path, f_name)
+    #graph_batch_from_graph_list(graph_list, data_dir_path, f_name, max_num_nodes_per_batch)
 
-    print("Processing Validation Set")
-    f_name = "val"
-    graph_list = load_dataset_from_h5(data_dir_path, f_name)
-    graph_batch_from_graph_list(graph_list, data_dir_path, f_name, max_num_nodes_per_batch)
+    #print("Processing Validation Set")
+    #f_name = "val"
+    #graph_list = load_dataset_from_h5(data_dir_path, f_name)
+    #graph_batch_from_graph_list(graph_list, data_dir_path, f_name, max_num_nodes_per_batch)
 
     print("Processing Test Set")
     f_name = "test"

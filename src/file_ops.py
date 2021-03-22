@@ -15,8 +15,8 @@ def load_brep_features(base_path):
                 continue
             s = line[:-1].split(',')
             brep_keys.append(s[0])
-            features.append(list(map(float, s[1:-1])))
-            labels.append(s[-1])
+            features.append(list(map(float, s[1:6])))
+            labels.append(s[6])
     
     features = np.array(features, dtype=np.float32)
     labels = np.array(labels, dtype=np.float32)

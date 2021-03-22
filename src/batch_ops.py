@@ -10,6 +10,7 @@ def normalize_data(data):
     data_norm = (data - data_min) / (data_max - data_min)
     return data_norm
 
+
 def disjoint_adj(m1, m2):
     shape_m1 = np.shape(m1)
     shape_m2 = np.shape(m2)
@@ -18,6 +19,7 @@ def disjoint_adj(m1, m2):
     m3[:shape_m1[0], :shape_m1[1]] = m1
     m3[shape_m1[0]:, shape_m1[1]:] = m2
     return m3
+
 
 def graph_batch_from_graph_list(graph_list, file_path, file_name, max_nodes_per_batch=15000, num_levels=2, is_sparse=True, edges=True):   
     node_counter = 0
@@ -60,7 +62,8 @@ def graph_batch_from_graph_list(graph_list, file_path, file_name, max_nodes_per_
         write_batches_to_file_sparse(batch_counter, raw_batch, file_path, file_name, num_levels)
     else:
         write_batches_to_file(batch_counter, raw_batch, file_path, file_name, num_levels)
-    
+
+
 def get_sparse_tensor_info(matrix, default_val):
     idx = np.where(np.not_equal(matrix, default_val))
     values = matrix[idx]
@@ -71,6 +74,7 @@ def get_sparse_tensor_info(matrix, default_val):
     shape = np.array(shape).astype(np.int32)
     
     return [idx, values, shape]
+
 
 def write_batches_to_file(batch_num, batch, file_path, file_name, num_levels=2):
     path = file_path + file_name + "_dense.h5"
@@ -97,6 +101,7 @@ def write_batches_to_file(batch_num, batch, file_path, file_name, num_levels=2):
             adj_count += 1
 
     hf.close()
+
 
 def write_batches_to_file_sparse(batch_num, batch, file_path, file_name, num_levels=2, edges=True):
     path = file_path + file_name + "_sparse.h5"

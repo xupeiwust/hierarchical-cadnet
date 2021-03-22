@@ -1,13 +1,14 @@
 import tensorflow as tf
 import numpy as np
 from sklearn.metrics import classification_report
-from src.network_adj_residual import HierarchicalGCNN as HierGCNN
-from src.helper import dataloader_adj as dataloader
+from src.network_edge_residual import HierarchicalGCNN as HierGCNN
+from src.helper import load_graphs_from_csv as dataloader
 import time
 import csv
 import seaborn as sn
 import matplotlib.pyplot as plt
 import pandas as pd
+import os
 
 
 def test_step(x, y, num_classes):
@@ -100,8 +101,32 @@ def mean_iou(pred, target):
     return iou
 
 
+def read_handle_csv(csv_path):
+    handles = []
+
+    with open(csv_path, 'r') as file:
+        for i, line in enumerate(file):
+            if i == 0:  # Skip first line (header)
+                continue
+            s = line[:-1].split(',')
+            handles.append(s[1])
+
+    return handles
+
+
+def save_prediction(handle_csv_path, pred):
+    handles = read_handle_csv(handle_csv_path)
+
+    with open('prediction.csv', 'w', newline='') as csvfile:
+        csvwriter = csv.writer(csvfile, delimiter=",")
+        csvwriter.writerow(["Handles", "Prediction"])
+
+        for i in range(len(handles)):
+            csvwriter.writerow([handles[i], pred[i]])
+
+
 if __name__ == '__main__':
-    num_classes = 16
+    num_classes = 25
     units = 512
     num_epochs = 100
     learning_rate = 1e-2
@@ -122,8 +147,10 @@ if __name__ == '__main__':
     test_recall_metric = tf.keras.metrics.Recall()
     test_iou_metric = tf.keras.metrics.MeanIoU(num_classes=num_classes)
 
-    model.load_weights("checkpoint/residual_lvl_7_adj_planar_units_512_date_2021-01-04.ckpt")
-    test_dataloader = dataloader("data/Planar_70_15_15/test_sparse.h5")
+    #model.load_weights("checkpoint/residual_lvl_7_adj_mixed_units_512_date_2021-01-11.ckpt")
+    model.load_weights("checkpoint/residual_lvl_7_edge_mixed_units_512_date_2021-01-11.ckpt")
+
+    test_dataloader = dataloader("data/Mixed_Complex/CSVs_to_run/")
 
     y_true_total = []
     y_pred_total = []
@@ -132,8 +159,12 @@ if __name__ == '__main__':
     start_time = time.time()
 
     for x_batch_test, y_batch_test in test_dataloader:
+
         one_hot_y = tf.one_hot(y_batch_test, depth=num_classes)
         y_true, y_pred, iou = test_step(x_batch_test, one_hot_y, num_classes)
+        print(f"True: {y_true}")
+        print(f"Pred: {y_pred}")
+        save_prediction("data/Mixed_Complex/CSVs_to_run/0-0-0-0-0-4-8-14-20/0-0-0-0-0-4-8-14-20_taghandle.csv", y_pred)
         y_true_total = np.append(y_true_total, y_true)
         y_pred_total = np.append(y_pred_total, y_pred)
 
@@ -141,7 +172,7 @@ if __name__ == '__main__':
 
     print("Time taken: %.2fs" % (time.time() - start_time))
 
-    analysis_report_planar(y_true_total, y_pred_total)
+    analysis_report(y_true_total, y_pred_total)
     test_loss = test_loss_metric.result()
     test_acc = test_acc_metric.result()
     test_precision = test_precision_metric.result()
