@@ -43,3 +43,6 @@ Please cite this work if used in your research:
       Title = {Hierarchical Graph Convolutional Neural Network for Machining Feature Segmentation},
       Year = {2021}
     }
+
+## Funding 
+This project was funded through DfE funding.
