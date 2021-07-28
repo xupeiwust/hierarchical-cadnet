@@ -16,6 +16,7 @@ class HierarchicalGCNN(tf.keras.Model):
             setattr(self, f"bn_1_{i}", tf.keras.layers.BatchNormalization(name=f"BN_1_{i}"))
             setattr(self, f"dp_1_{i}", tf.keras.layers.Dropout(rate=rate, name=f"DP_1_{i}"))
 
+        for i in range(1, self.num_layers + 1):
             setattr(self, f"gcnn_2_{i}", GraphCNNLayer(filters=units, name=f"GCNN_2_{i}"))
             setattr(self, f"bn_2_{i}", tf.keras.layers.BatchNormalization(name=f"BN_2_{i}"))
             setattr(self, f"dp_2_{i}", tf.keras.layers.Dropout(rate=rate, name=f"DP_2_{i}"))

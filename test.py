@@ -2,7 +2,7 @@ import tensorflow as tf
 import numpy as np
 from sklearn.metrics import classification_report
 from src.network_edge_residual import HierarchicalGCNN as HierGCNN
-from src.helper import load_graphs_from_csv as dataloader
+from src.helper import dataloader_edge as dataloader
 import time
 import csv
 import seaborn as sn
@@ -43,11 +43,12 @@ def analysis_report(y_true, y_pred):
     print(classification_report(y_true, y_pred, labels=labels, target_names=target_names, digits=4))
 
 
-def analysis_report_planar(y_true, y_pred):
-    target_names = ["Rectangular through slot", "Triangular through slot", "Rectangular passage", "Triangular passage",
-                    "6-sides passage", "Rectangular through step", "2-sides through step", "Slanted through step",
-                    "Rectangular blind step", "Triangular blind step", "Rectangular blind slot", "Rectangular pocket",
-                    "Triangular pocket", "6-sides pocket", "Chamfer", "Stock"]
+def analysis_report_mfcad(y_true, y_pred):
+    target_names = ["Chamfer", "Triangular passage", "Rectangular passage", "6-sides passage", "Triangular through slot",
+                    "Rectangular through slot", "Rectangular through step", "2-sides through step", "Slanted through step",
+                    "Triangular pocket", "Rectangular pocket", "6-sides pocket", "Rectangular blind slot",
+                    "Triangular blind step", "Rectangular blind step", "Stock"]
+
     labels = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
 
     print(classification_report(y_true, y_pred, labels=labels, target_names=target_names, digits=4))
@@ -127,6 +128,7 @@ def save_prediction(handle_csv_path, pred):
 
 if __name__ == '__main__':
     num_classes = 25
+    num_layers = 7
     units = 512
     num_epochs = 100
     learning_rate = 1e-2
@@ -135,7 +137,7 @@ if __name__ == '__main__':
     lr_schedule = tf.keras.optimizers.schedules.ExponentialDecay(learning_rate,
                                                                  decay_steps=100000, decay_rate=decay_rate)
 
-    model = HierGCNN(units=units, rate=dropout_rate, num_classes=num_classes)
+    model = HierGCNN(units=units, rate=dropout_rate, num_classes=num_classes, num_layers=num_layers)
 
     optimizer = tf.keras.optimizers.Adam(learning_rate=lr_schedule)
 
@@ -148,9 +150,10 @@ if __name__ == '__main__':
     test_iou_metric = tf.keras.metrics.MeanIoU(num_classes=num_classes)
 
     #model.load_weights("checkpoint/residual_lvl_7_adj_mixed_units_512_date_2021-01-11.ckpt")
-    model.load_weights("checkpoint/residual_lvl_7_edge_mixed_units_512_date_2021-01-11.ckpt")
+    model.load_weights("checkpoint/MF_CAD++_residual_lvl_7_edge_MFCAD++_units_512_date_2021-07-27_epochs_100.ckpt")
+    #print(model.summary())
 
-    test_dataloader = dataloader("data/Mixed_Complex/CSVs_to_run/")
+    test_dataloader = dataloader("/home/mlg/Documents/Andrew/Datasets/MFCAD++/hierarchical_graphs/test_MFCAD++.h5")
 
     y_true_total = []
     y_pred_total = []
@@ -162,9 +165,9 @@ if __name__ == '__main__':
 
         one_hot_y = tf.one_hot(y_batch_test, depth=num_classes)
         y_true, y_pred, iou = test_step(x_batch_test, one_hot_y, num_classes)
-        print(f"True: {y_true}")
-        print(f"Pred: {y_pred}")
-        save_prediction("data/Mixed_Complex/CSVs_to_run/0-0-0-0-0-4-8-14-20/0-0-0-0-0-4-8-14-20_taghandle.csv", y_pred)
+        #print(f"True: {y_true}")
+        #print(f"Pred: {y_pred}")
+        #save_prediction("data/Mixed_Complex/CSVs_to_run/0-0-0-0-0-4-8-14-20/0-0-0-0-0-4-8-14-20_taghandle.csv", y_pred)
         y_true_total = np.append(y_true_total, y_true)
         y_pred_total = np.append(y_pred_total, y_pred)
 
@@ -172,7 +175,7 @@ if __name__ == '__main__':
 
     print("Time taken: %.2fs" % (time.time() - start_time))
 
-    analysis_report(y_true_total, y_pred_total)
+    analysis_report_mfcad(y_true_total, y_pred_total)
     test_loss = test_loss_metric.result()
     test_acc = test_acc_metric.result()
     test_precision = test_precision_metric.result()
@@ -180,7 +183,7 @@ if __name__ == '__main__':
     test_iou = test_iou_metric.result()
 
     #write_confusion_matrix(y_true_total, y_pred_total, num_classes)
-    #plot_confusion_matrix(y_true_total, y_pred_total, num_classes)
+    plot_confusion_matrix(y_true_total, y_pred_total, num_classes)
 
     #tf.summary.scalar('test_loss', test_loss, step=optimizer.iterations)
     #tf.summary.scalar('test_acc', test_acc, step=optimizer.iterations)

@@ -63,13 +63,14 @@ if __name__ == '__main__':
         print(f"Epoch {epoch + 1} of {num_epochs}")
         start_time = time.time()
 
-        train_dataloader = dataloader("data/Single_Feature_70_15_15/train_sparse.h5")
-        val_dataloader = dataloader("data/Single_Feature_70_15_15/val_sparse.h5")
+        train_dataloader = dataloader("data/Single_Feature_70_15_15_hier_graphs/train_sparse.h5")
+        val_dataloader = dataloader("data/Single_Feature_70_15_15_hier_graphs/val_sparse.h5")
 
         with summary_writer.as_default():
             for step, (x_batch_train, y_batch_train) in enumerate(train_dataloader):
                 one_hot_y = tf.one_hot(y_batch_train, depth=num_classes, axis=-1)
                 train_step(x_batch_train, one_hot_y)
+                model.summary()
 
                 # Log every 100 batches.
                 if step % 100 == 0:
