@@ -115,15 +115,38 @@ def read_handle_csv(csv_path):
     return handles
 
 
-def save_prediction(handle_csv_path, pred):
-    handles = read_handle_csv(handle_csv_path)
+def save_prediction(name, labels, pred):
+    with open("/home/mlg/Documents/Andrew/hierarchical-cadnet/result_labels/" + name + '_pred.csv', 'w', newline='') as csv_file:
+        csv_writer = csv.writer(csv_file, delimiter=",")
+        csv_writer.writerow(["Groundtruth", "Prediction"])
 
-    with open('prediction.csv', 'w', newline='') as csvfile:
-        csvwriter = csv.writer(csvfile, delimiter=",")
-        csvwriter.writerow(["Handles", "Prediction"])
+        for i in range(len(labels)):
+            csv_writer.writerow([labels[i], pred[i]])
 
-        for i in range(len(handles)):
-            csvwriter.writerow([handles[i], pred[i]])
+
+def face_upvoting(facet_to_face, face_labels_true, facet_preds):
+    face_labels = {}
+    face_labels_upvote = []
+
+    m, n = facet_to_face.shape
+
+    for i in range(m):
+        face_index = np.nonzero(facet_to_face[i])[0][0]
+
+        if face_index not in face_labels:
+            face_labels[face_index] = [facet_preds[i]]
+        else:
+            face_labels[face_index].append(facet_preds[i])
+
+    for key, value in face_labels.items():
+        counts = np.bincount(np.array(value))
+        face_labels_upvote.append(np.argmax(counts))
+
+    batch_pred = np.array(face_labels_upvote)
+    c_faces = np.sum((batch_pred == face_labels_true))
+    t_faces = np.size(face_labels_true)
+
+    return c_faces, t_faces
 
 
 if __name__ == '__main__':
@@ -132,7 +155,7 @@ if __name__ == '__main__':
     units = 512
     num_epochs = 100
     learning_rate = 1e-2
-    dropout_rate = 0.3
+    dropout_rate = 1.0
     decay_rate = learning_rate / num_epochs
     lr_schedule = tf.keras.optimizers.schedules.ExponentialDecay(learning_rate,
                                                                  decay_steps=100000, decay_rate=decay_rate)
@@ -149,8 +172,7 @@ if __name__ == '__main__':
     test_recall_metric = tf.keras.metrics.Recall()
     test_iou_metric = tf.keras.metrics.MeanIoU(num_classes=num_classes)
 
-    #model.load_weights("checkpoint/residual_lvl_7_adj_mixed_units_512_date_2021-01-11.ckpt")
-    model.load_weights("checkpoint/MF_CAD++_residual_lvl_7_edge_MFCAD++_units_512_date_2021-07-27_epochs_100.ckpt")
+    model.load_weights("checkpoint/ablation/MF_CAD++_edge_lvl_7_edge_MFCAD++_units_512_date_2021-09-01_epochs_100.ckpt")
     #print(model.summary())
 
     test_dataloader = dataloader("/home/mlg/Documents/Andrew/Datasets/MFCAD++/hierarchical_graphs/test_MFCAD++.h5")
@@ -158,16 +180,31 @@ if __name__ == '__main__':
     y_true_total = []
     y_pred_total = []
     ious = []
+    correct_faces = total_faces = 0
 
     start_time = time.time()
 
-    for x_batch_test, y_batch_test in test_dataloader:
-
+    for x_batch_test, y_batch_test, CAD_models, idxs in test_dataloader:
         one_hot_y = tf.one_hot(y_batch_test, depth=num_classes)
         y_true, y_pred, iou = test_step(x_batch_test, one_hot_y, num_classes)
-        #print(f"True: {y_true}")
-        #print(f"Pred: {y_pred}")
-        #save_prediction("data/Mixed_Complex/CSVs_to_run/0-0-0-0-0-4-8-14-20/0-0-0-0-0-4-8-14-20_taghandle.csv", y_pred)
+
+        previous_idx = 0
+
+        for i in range(len(CAD_models)):
+            name = str(CAD_models[i])[2:-1]
+            model_idx = idxs[i][0] + 1
+
+            slice_true = y_true[previous_idx:model_idx]
+            slice_pred = y_pred[previous_idx:model_idx]
+            previous_idx = model_idx
+            save_prediction(name, slice_true, slice_pred)
+
+        break
+
+        #num_correct_faces, num_total_faces = face_upvoting(A_3, labels_face, y_pred)
+        #correct_faces += num_correct_faces
+        #total_faces += num_total_faces
+
         y_true_total = np.append(y_true_total, y_true)
         y_pred_total = np.append(y_pred_total, y_pred)
 
@@ -175,7 +212,8 @@ if __name__ == '__main__':
 
     print("Time taken: %.2fs" % (time.time() - start_time))
 
-    analysis_report_mfcad(y_true_total, y_pred_total)
+    #print(f"Test acc per face: {correct_faces / total_faces}")
+    analysis_report(y_true_total, y_pred_total)
     test_loss = test_loss_metric.result()
     test_acc = test_acc_metric.result()
     test_precision = test_precision_metric.result()
@@ -183,7 +221,7 @@ if __name__ == '__main__':
     test_iou = test_iou_metric.result()
 
     #write_confusion_matrix(y_true_total, y_pred_total, num_classes)
-    plot_confusion_matrix(y_true_total, y_pred_total, num_classes)
+    #plot_confusion_matrix(y_true_total, y_pred_total, num_classes)
 
     #tf.summary.scalar('test_loss', test_loss, step=optimizer.iterations)
     #tf.summary.scalar('test_acc', test_acc, step=optimizer.iterations)

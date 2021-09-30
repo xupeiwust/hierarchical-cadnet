@@ -5,22 +5,6 @@ from src.network_edge_residual import HierarchicalGCNN as HierGCNN
 from src.helper import dataloader_edge as dataloader
 
 
-def train_step_weighted(x, hot_y, y):
-    sample_weights = np.take(class_weights, y)
-
-    with tf.GradientTape() as tape:
-        logits = model(x, training=True)
-        loss_value = loss_fn(hot_y, logits, sample_weight=sample_weights)
-        grads = tape.gradient(loss_value, model.trainable_variables)
-
-    grads = [tf.clip_by_norm(g, 1.0) for g in grads]
-    optimizer.apply_gradients(zip(grads, model.trainable_variables))
-
-    train_loss_metric.update_state(loss_value)
-    train_acc_metric.update_state(hot_y, logits)
-    train_miou_metric.update_state(hot_y, logits)
-
-
 def train_step(x, y):
     with tf.GradientTape() as tape:
         logits = model(x, training=True)
@@ -54,10 +38,6 @@ if __name__ == '__main__':
         print("MFCAD++")
         num_classes = 25
 
-    class_weights = np.array([0.049985, 0.049299, 0.016895, 0.012569, 0.00843, 0.073304, 0.045495, 0.134623,
-                             0.026871, 0.018387, 0.026435, 0.01925, 0.028516, 0.014515, 0.011091, 0.008496,
-                             0.011977, 0.053868, 0.067164, 0.07911, 0.02704, 0.027974, 0.01833, 0.167209, 0.003167])
-
     num_layers = 7
     units = 512
     num_epochs = 100
@@ -67,7 +47,7 @@ if __name__ == '__main__':
     lr_schedule = tf.keras.optimizers.schedules.ExponentialDecay(learning_rate,
                                                                  decay_steps=100000, decay_rate=decay_rate)
 
-    save_name = f'MF_CAD++_residual_lvl_{num_layers}_edge_{data_type}_units_{units}_date_{dt.datetime.now().strftime("%Y-%m-%d")}_epochs_{num_epochs}'
+    save_name = f'ablation/MF_CAD++_edge_lvl_{num_layers}_edge_{data_type}_units_{units}_date_{dt.datetime.now().strftime("%Y-%m-%d")}_epochs_{num_epochs}'
 
     model = HierGCNN(units=units, rate=dropout_rate, num_classes=num_classes, num_layers=num_layers)
     #model.load_weights("checkpoint/residual_planar_planar_units_512_date_2020-11-11.ckpt")
@@ -101,7 +81,6 @@ if __name__ == '__main__':
         with summary_writer.as_default():
             for step, (x_batch_train, y_batch_train) in enumerate(train_dataloader):
                 one_hot_y = tf.one_hot(y_batch_train, depth=num_classes)
-                #train_step_weighted(x_batch_train, one_hot_y, y_batch_train)
                 train_step(x_batch_train, one_hot_y)
                 #model.summary()
 
