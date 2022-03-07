@@ -1,9 +1,18 @@
-from src.helper import *
+"""Module containing classes for different neural network layers for Hierarchical CADNet neural architecture."""
+
+
 import tensorflow as tf
 import math
 
 
+class GraphCNNGlobal(object):
+    BN_DECAY = 0.999
+    GRAPHCNN_INIT_FACTOR = 1.
+    GRAPHCNN_I_FACTOR = 1.0
+    
+
 class GraphCNNLayer(tf.keras.layers.Layer):
+    """Graph convolutional layer that uses the adjacency matrix."""
     def __init__(self, filters, name="GCNN", **kwargs):
         super(GraphCNNLayer, self).__init__(name=name, **kwargs)
 
@@ -63,6 +72,7 @@ class GraphCNNLayer(tf.keras.layers.Layer):
 
 
 class GraphEdgeConvLayer(tf.keras.layers.Layer):
+    """Graph convolutional layer that uses the edge convexity."""
     def __init__(self, filters, name="GCNN_Edge", **kwargs):
         super(GraphEdgeConvLayer, self).__init__(name=name, **kwargs)
 
@@ -71,7 +81,6 @@ class GraphEdgeConvLayer(tf.keras.layers.Layer):
         self.W_E_1 = None
         self.W_E_2 = None
         self.W_E_3 = None
-        #self.W_sum = None
         self.W_I = None
         self.b = None
 
@@ -136,6 +145,7 @@ class GraphEdgeConvLayer(tf.keras.layers.Layer):
 
 
 class GraphEmbeddingLayer(tf.keras.layers.Layer):
+    """Graph embedding layer for summarizing learned information."""
     def __init__(self, filters, name="GEmbed", **kwargs):
         super(GraphEmbeddingLayer, self).__init__(name=name, **kwargs)
 
@@ -172,6 +182,7 @@ class GraphEmbeddingLayer(tf.keras.layers.Layer):
 
 
 class GraphPoolingLayer(tf.keras.layers.Layer):
+    """Graph pooling layer for decreasing number of vertices in graph signal."""
     def __init__(self, num_vertices=1, name="GraphPool", **kwargs):
         super(GraphPoolingLayer, self).__init__(name=name, **kwargs)
 
@@ -212,13 +223,11 @@ class GraphPoolingLayer(tf.keras.layers.Layer):
         if self.num_vertices == 1:
             return tf.reshape(result, [-1, self.num_features])
 
-        #result_A = tf.matmul(A, factors)
-        #result_A = tf.matmul(factors, result_A, transpose_a=True)
-
         return result
 
 
 class GlobalPoolingLayer(tf.keras.layers.Layer):
+    """Global average pooling layer for graph classification."""
     def __init__(self, name="GlobalPool", **kwargs):
         super(GlobalPoolingLayer, self).__init__(name=name, **kwargs)
 
@@ -230,6 +239,7 @@ class GlobalPoolingLayer(tf.keras.layers.Layer):
 
 
 class TransferLayer(tf.keras.layers.Layer):
+    """Transfer layer for passing learned information between graph levels."""
     def __init__(self, name="Transfer", **kwargs):
         super(TransferLayer, self).__init__(name=name, **kwargs)
 

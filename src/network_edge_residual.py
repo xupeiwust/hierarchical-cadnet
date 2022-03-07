@@ -1,3 +1,5 @@
+"""Module for defining Hierarchical CADNet network architecture using only adjacency information."""
+
 from src.layers import *
 
 
@@ -40,7 +42,7 @@ class HierarchicalGCNN(tf.keras.Model):
         self.softmax = tf.keras.layers.Softmax()
 
     def call(self, inputs, training=False):
-        V_1, E_1, E_2, E_3, V_2, A_2, A_3, A_4 = inputs
+        V_1, E_1, E_2, E_3, V_2, A_2, A_3 = inputs
 
         x_1 = self.ge_start(V_1)
         x_1 = self.bn_start(x_1, training=training)
@@ -70,7 +72,7 @@ class HierarchicalGCNN(tf.keras.Model):
         x_2 = self.dp_2(x_2, training=training)
 
         # A3 => Embedding from Level 2 to Level 1
-        a_3 = self.a3([x_2, x_1, A_4])
+        a_3 = self.a3([x_2, x_1, tf.transpose(A_3)])
         a_3 = self.bn_a3(a_3, training=training)
         a_3 = tf.nn.relu(a_3)
         x_1 += a_3
