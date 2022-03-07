@@ -2,7 +2,7 @@
 
 import tensorflow as tf
 import datetime as dt
-from src.network_edge_residual import HierarchicalGCNN as HierGCNN
+from src.network_edge import HierarchicalGCNN as HierGCNN
 from src.helper import dataloader_edge as dataloader
 
 

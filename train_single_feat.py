@@ -30,11 +30,13 @@ if __name__ == '__main__':
 
     num_classes = 24
     batch_size = 64
-
     units = 512
     num_epochs = 100
     learning_rate = 1e-2
     dropout_rate = 0.3
+    train_set_path = "data/Single_Feature_70_15_15_hier_graphs/train_sparse.h5"
+    val_set_path = "data/Single_Feature_70_15_15_hier_graphs/val_sparse.h5"
+
     decay_rate = learning_rate / num_epochs
     lr_schedule = tf.keras.optimizers.schedules.ExponentialDecay(learning_rate,
                                                                  decay_steps=100000, decay_rate=decay_rate)
@@ -47,7 +49,6 @@ if __name__ == '__main__':
     optimizer = tf.keras.optimizers.Adam(learning_rate=lr_schedule)
 
     summary_writer = tf.summary.create_file_writer(f'./log/{save_name}')
-
     train_loss_metric = tf.keras.metrics.Mean()
     train_acc_metric = tf.keras.metrics.CategoricalAccuracy()
     val_loss_metric = tf.keras.metrics.Mean()
@@ -63,8 +64,8 @@ if __name__ == '__main__':
         print(f"Epoch {epoch + 1} of {num_epochs}")
         start_time = time.time()
 
-        train_dataloader = dataloader("data/Single_Feature_70_15_15_hier_graphs/train_sparse.h5")
-        val_dataloader = dataloader("data/Single_Feature_70_15_15_hier_graphs/val_sparse.h5")
+        train_dataloader = dataloader(train_set_path)
+        val_dataloader = dataloader(val_set_path)
 
         with summary_writer.as_default():
             for step, (x_batch_train, y_batch_train) in enumerate(train_dataloader):

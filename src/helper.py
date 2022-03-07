@@ -6,6 +6,7 @@ import numpy as np
 
 
 def face_upvoting(facet_to_face, face_labels_true, facet_preds):
+    """Function for face upvoting when segmenting the facets on the mesh level."""
     face_labels = {}
     face_labels_upvote = []
 

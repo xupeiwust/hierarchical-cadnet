@@ -1,11 +1,11 @@
-"""Script for test loop using Hierarchical CADNet (Adj)."""
+"""Script for test loop using Hierarchical CADNet (Edge)."""
 
 import time
 import tensorflow as tf
 import numpy as np
 
-from src.network_adj import HierarchicalGCNN as HierGCNN
-from src.helper import dataloader_adj as dataloader
+from src.network_edge import HierarchicalGCNN as HierGCNN
+from src.helper import dataloader_edge as dataloader
 from src.analysis import analysis_report_mfcadplus
 
 
