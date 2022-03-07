@@ -1,3 +1,5 @@
+"""Script for test loop using Hierarchical CADNet (Single Feature)."""
+
 import tensorflow as tf
 import numpy as np
 from sklearn.metrics import classification_report
@@ -35,20 +37,22 @@ def analysis_report(y_true, y_pred):
 
 
 if __name__ == '__main__':
+    # User defined parameters
     num_classes = 24
     units = 512
     num_epochs = 100
     learning_rate = 1e-2
     dropout_rate = 0.3
     batch_size = 64
+    test_set_path = "data/test_single.h5"
+    checkpoint_path = "checkpoint/lvl_7_adj_single_units_512_date_2020-12-15.ckpt"
+
     decay_rate = learning_rate / num_epochs
     lr_schedule = tf.keras.optimizers.schedules.ExponentialDecay(learning_rate,
                                                                  decay_steps=100000, decay_rate=decay_rate)
 
     model = HierGCNN(units=units, rate=dropout_rate, num_classes=num_classes)
-
     optimizer = tf.keras.optimizers.Adam(learning_rate=lr_schedule)
-
     loss_fn = tf.keras.losses.CategoricalCrossentropy()
 
     test_loss_metric = tf.keras.metrics.Mean()
@@ -57,8 +61,8 @@ if __name__ == '__main__':
     test_recall_metric = tf.keras.metrics.Recall()
     test_iou_metric = tf.keras.metrics.MeanIoU(num_classes=num_classes)
 
-    model.load_weights("checkpoint/lvl_7_adj_single_units_512_date_2020-12-15.ckpt")
-    test_dataloader = dataloader("data/Single_Feature_70_15_15/test_sparse.h5")
+    model.load_weights(checkpoint_path)
+    test_dataloader = dataloader(test_set_path)
 
     y_true_total = []
     y_pred_total = []
@@ -79,9 +83,6 @@ if __name__ == '__main__':
     test_precision = test_precision_metric.result()
     test_recall = test_recall_metric.result()
     test_iou = test_iou_metric.result()
-
-    #tf.summary.scalar('test_loss', test_loss, step=optimizer.iterations)
-    #tf.summary.scalar('test_acc', test_acc, step=optimizer.iterations)
 
     test_loss_metric.reset_states()
     test_acc_metric.reset_states()
