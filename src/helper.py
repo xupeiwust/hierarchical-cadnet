@@ -1,7 +1,8 @@
 """Module containing useful functions such as dataloader generator functions."""
 
 import tensorflow as tf
-from src.batch_ops import *
+import h5py
+import numpy as np
 
 
 def face_upvoting(facet_to_face, face_labels_true, facet_preds):
