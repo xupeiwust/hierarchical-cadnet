@@ -7,14 +7,15 @@ It is a deep learning approach to learn machining features from CAD models. To a
 ![](imgs/hierarchical_graph_structure.png)
 
 ## Requirements
-- Python > 3.8.5
-- Tensorflow > 2.2.0
-- h5py > 1.10.6
-- Numpy > 1.19.1
-- Scikit-learn > 0.23.2
+- Python >= 3.8.5
+- Tensorflow >= 2.2.0
+- h5py >= 1.10.6
+- Numpy >= 1.19.1
+- Scikit-learn >= 0.23.2
 
 ## Instructions
-- Place dataset in */data* folder.
+- Generate hierarchical B-Rep graphs and batches using code in this repo: https://gitlab.com/qub_femg/machine-learning/hierarchical-brep-graphs
+- Place hdf5 dataset files in */data* folder.
 - To train Hierarchical CADNet (Edge) which uses edge convexity information run **train_edge.py**, set data type, dataloader file locations.
 - To train Hierarchical CADNet (Adj) which uses only adjacency information run **train_adj.py**, set data type, dataloader file locations.
 - To train Hierarchical CADNet (Single) which is a graph classification task run **train_single_feat.py**, set data type, dataloader file locations.
