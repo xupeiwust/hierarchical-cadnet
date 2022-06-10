@@ -23,7 +23,7 @@ It is a deep learning approach to learn machining features from CAD models. To a
 ## Citation
 Please cite this work if used in your research:
 
-    @article{hierarchicalcadnet2021,
+    @article{hierarchicalcadnet2022,
       Author = {Andrew R. Colligan, Trevor. T. Robinson, Declan C. Nolan, Yang Hua, Weijuan Cao},
       Journal = {Computer-Aided Design},
       Title = {Hierarchical CADNet: Learning from B-Reps for Machining Feature Recognition},
