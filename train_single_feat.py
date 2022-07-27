@@ -29,13 +29,12 @@ if __name__ == '__main__':
     import time
 
     num_classes = 24
-    batch_size = 64
     units = 512
     num_epochs = 100
     learning_rate = 1e-2
     dropout_rate = 0.3
-    train_set_path = "data/Single_Feature_70_15_15_hier_graphs/train_sparse.h5"
-    val_set_path = "data/Single_Feature_70_15_15_hier_graphs/val_sparse.h5"
+    train_set_path = "data/single_feature/train_batch.h5"
+    val_set_path = "data/single_feature/val_batch.h5"
 
     decay_rate = learning_rate / num_epochs
     lr_schedule = tf.keras.optimizers.schedules.ExponentialDecay(learning_rate,
@@ -71,7 +70,6 @@ if __name__ == '__main__':
             for step, (x_batch_train, y_batch_train) in enumerate(train_dataloader):
                 one_hot_y = tf.one_hot(y_batch_train, depth=num_classes, axis=-1)
                 train_step(x_batch_train, one_hot_y)
-                model.summary()
 
                 # Log every 100 batches.
                 if step % 100 == 0:
@@ -113,7 +111,6 @@ if __name__ == '__main__':
             val_acc_metric.reset_states()
 
             print(f"Val loss={val_loss}, Val acc={val_acc}")
-
             print("Time taken: %.2fs" % (time.time() - start_time))
 
     print(f"Epoch={max_epoch + 1}, Max train acc={max_train_acc}, Max val acc={max_val_acc}")
