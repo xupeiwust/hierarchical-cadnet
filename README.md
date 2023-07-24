@@ -28,6 +28,9 @@ There is a basic CAD viewer provided. To use it additional Python packages are r
 To test a single CAD model with a trained network model and save a STEP file with the predicted labels, the `test_and_save.py` script can be used.
 A directory of STEP files can be viewed using the `visualizer.py` script, in which each label has a unique color.
 
+## Test Cases
+In the Hierarchical CADNet paper, Section 6.4 discussed results on more complex test cases. The STEP files for these CAD models can be found in the `test_cases` directory. These are labelled in the same way as the MFCAD++ dataset, with a label id being attributed to each B-Rep face in the CAD model.
+
 ## Citation
 Please cite this work if used in your research:
 
