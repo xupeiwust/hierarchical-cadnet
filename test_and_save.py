@@ -46,7 +46,6 @@ class WorkFace:
         self.surface_area = None
         self.centroid = None
         self.face_type = None
-        self.label = None
 
 
 class WorkEdge:
@@ -92,9 +91,9 @@ class WorkFacet:
         self.centroid = [x, y, z]
 
 
-def get_brep_information(shape, label_map):
+def get_brep_information(shape):
     topo = TopologyExplorer(shape)
-    work_faces, faces = get_faces(topo, label_map)
+    work_faces, faces = get_faces(topo)
     work_edges = get_edges(topo, faces)
 
     return work_faces, work_edges, faces
@@ -255,7 +254,7 @@ def ask_face_centroid(face):
     return gPt.Coord()
 
 
-def get_faces(topo, label_map):
+def get_faces(topo):
     work_faces = {}
     faces = list(topo.faces())
 
@@ -264,7 +263,6 @@ def get_faces(topo, label_map):
         wf.face_type = recognise_face_type(face)
         wf.surface_area = ask_surface_area(face)
         wf.centroid = ask_face_centroid(face)
-        wf.label = label_map[face]
 
         work_faces[wf.hash] = wf
 
@@ -423,15 +421,13 @@ def get_sparse_tensor(adj_matrix, default_value=0.):
 
 def get_face_features(faces):
     faces_list = []
-    label_list = []
 
     for face_tag, face in faces.items():
         face_list = [face.surface_area, face.centroid[0], face.centroid[1], face.centroid[2],
                      face.face_type]
         faces_list.append(face_list)
-        label_list.append(face.label)
 
-    return np.array(faces_list, dtype=np.float32), np.array(label_list, dtype=np.float32)
+    return np.array(faces_list, dtype=np.float32)
 
 
 def get_facet_features(facets):
@@ -507,10 +503,6 @@ def normalize_data(data):
     return data_norm
 
 
-def zero_centered_data(data):
-    """Standardize data so mean is zero centered."""
-    return (data - np.mean(data)) / np.std(data)
-
 
 def normalize_surface_labels(data, num_surface_types=11):
     """Normalize the surface labels."""
@@ -519,7 +511,7 @@ def normalize_surface_labels(data, num_surface_types=11):
 
 
 def get_graph(work_faces, work_facets, work_face_edges, work_facet_edges):
-    V_1, labels = get_face_features(work_faces)
+    V_1 = get_face_features(work_faces)
     V_2 = get_facet_features(work_facets)
     A_1, E_1, E_2, E_3 = get_face_adj(work_face_edges, work_faces)
     A_2 = get_facet_adj(work_facets, work_facet_edges)
@@ -531,26 +523,31 @@ def get_graph(work_faces, work_facets, work_face_edges, work_facet_edges):
     V_2 = V_2[:, :-1]
 
     V_1 = normalize_data(V_1)
-    d_cos = zero_centered_data(d_cos)
+    V_2 = normalize_data(V_2)
     surface_labels = normalize_surface_labels(surface_labels)
 
     V_1 = np.concatenate((V_1, surface_labels), axis=1)
     V_2 = np.concatenate((V_2, d_cos), axis=1)
 
-    return [V_1, E_1, E_2, E_3, V_2, A_2, A_3], labels
+    return [V_1, E_1, E_2, E_3, V_2, A_2, A_3]
 
 
-def check_face_in_map(topo, label_map):
-    """Function to check loaded faces match face label map."""
-    failure = False
-    faces = list(topo.faces())
+def read_step_file(filename):
+    """Reads STEP file."""
+    if not os.path.exists(filename):
+        print(filename, ' not exists')
+        return
 
-    for face in faces:
-        if face not in label_map:
-            failure = True
-            break
+    reader = STEPControl_Reader()
+    reader.ReadFile(filename)
+    reader.TransferRoots()
+    shape = reader.OneShape()
 
-    return failure
+    treader = reader.WS().TransferReader()
+
+    topo = TopologyExplorer(shape)
+
+    return shape, topo
 
 
 def read_step_with_labels(filename):
@@ -566,7 +563,7 @@ def read_step_with_labels(filename):
 
     treader = reader.WS().TransferReader()
 
-    id_map = {}
+    id_map = []
     topo = TopologyExplorer(shape)
     faces = list(topo.faces())
 
@@ -579,7 +576,7 @@ def read_step_with_labels(filename):
         name = item.Name().ToCString()
         if name:
             nameid = name
-            id_map[face] = nameid
+            id_map.append(int(nameid))
 
     return shape, id_map, topo
 
@@ -591,22 +588,19 @@ def triangulate_shape(shape, linear_deflection=0.9, angular_deflection=0.5):
     assert mesh.IsDone()
 
 
-def create_hier_graphs(step_path):
-    try:
-        shape, label_map, topo = read_step_with_labels(step_path)
-        failure_test = check_face_in_map(topo, label_map)
+def create_hier_graphs(step_path, with_labels=False):
+    if with_labels:
+        shape, labels, topo = read_step_with_labels(step_path)
+    else:
+        shape, topo = read_step_file(step_path)
+        labels = None
 
-        if failure_test:
-            print("Issue with face map")
-        else:
-            triangulate_shape(shape)
-            work_faces, work_edges, faces = get_brep_information(shape, label_map)
-            facet_dict, edge_facet_link, facet_face_link, node_dict = get_mesh_information(shape)
-            graph, labels = get_graph(work_faces, facet_dict, work_edges, edge_facet_link)
-            return graph, labels, shape
+    triangulate_shape(shape)
+    work_faces, work_edges, faces = get_brep_information(shape)
+    facet_dict, edge_facet_link, facet_face_link, node_dict = get_mesh_information(shape)
+    graph = get_graph(work_faces, facet_dict, work_edges, edge_facet_link)
 
-    except Exception as error:
-        print(error)
+    return graph, shape, labels
 
 
 def write_step_wth_prediction(filename, shape, prediction):
@@ -639,11 +633,12 @@ def test_step(x):
 
 
 if __name__ == '__main__':
+    with_labels = True
     step_dir = "data/"
-    step_name = "cad_model"
-    checkpoint_path = "checkpoint/lr_0.1_edge_lvl_6_MFCAD++_units_512_date_2022-02-15_epochs_100.ckpt"
+    step_name = "6_true"
+    checkpoint_path = "checkpoint/MF_CAD++_residual_lvl_7_edge_MFCAD++_units_512_date_2021-07-27_epochs_100.ckpt"
     num_classes = 25
-    num_layers = 6
+    num_layers = 7
     units = 512
     dropout_rate = 0.3
 
@@ -651,6 +646,14 @@ if __name__ == '__main__':
     loss_fn = tf.keras.losses.CategoricalCrossentropy()
 
     model.load_weights(checkpoint_path)
-    graph, labels, shape = create_hier_graphs(f"{step_dir}{step_name}.step")
+
+    graph, shape, labels = create_hier_graphs(os.path.join(step_dir, f"{step_name}.step"), with_labels=with_labels)
     y_pred = test_step(graph)
-    write_step_wth_prediction(f"{step_dir}{step_name}_pred.step", shape, y_pred)
+    write_step_wth_prediction(os.path.join(step_dir, f"{step_name}_pred.step"), shape, y_pred)
+
+    if with_labels:
+        labels = np.array(labels)
+        print(f"Predictions: {y_pred}")
+        print(f"True labels: {labels}")
+
+        print(f"Acc: {np.sum(np.where(y_pred == labels, 1, 0)) / labels.shape[0]}")
