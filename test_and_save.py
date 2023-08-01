@@ -503,7 +503,6 @@ def normalize_data(data):
     return data_norm
 
 
-
 def normalize_surface_labels(data, num_surface_types=11):
     """Normalize the surface labels."""
     data_norm = data / (num_surface_types + EPSILON)
@@ -518,16 +517,13 @@ def get_graph(work_faces, work_facets, work_face_edges, work_facet_edges):
     A_3 = get_face_facet_links(work_facets, work_faces)
 
     surface_labels = V_1[:, -1].reshape(-1, 1)
-    d_cos = V_2[:, -1].reshape(-1, 1)
     V_1 = V_1[:, :-1]
-    V_2 = V_2[:, :-1]
 
     V_1 = normalize_data(V_1)
     V_2 = normalize_data(V_2)
     surface_labels = normalize_surface_labels(surface_labels)
 
     V_1 = np.concatenate((V_1, surface_labels), axis=1)
-    V_2 = np.concatenate((V_2, d_cos), axis=1)
 
     return [V_1, E_1, E_2, E_3, V_2, A_2, A_3]
 
@@ -635,7 +631,7 @@ def test_step(x):
 if __name__ == '__main__':
     with_labels = True
     step_dir = "data/"
-    step_name = "6_true"
+    step_name = "1_true"
     checkpoint_path = "checkpoint/MF_CAD++_residual_lvl_7_edge_MFCAD++_units_512_date_2021-07-27_epochs_100.ckpt"
     num_classes = 25
     num_layers = 7
