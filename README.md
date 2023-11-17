@@ -22,8 +22,8 @@ It is a deep learning approach to learn machining features from CAD models. To a
 
 ## Visualization
 There is a basic CAD viewer provided. To use it additional Python packages are required (PythonOCC):
-- pythonocc-core >= 7.4.1 (more info here: https://github.com/tpaviot/pythonocc-core)
-- occt >= 7.4.0 (more info here: https://github.com/tpaviot/pythonocc-core)
+- pythonocc-core = 7.7.2 (more info here: https://github.com/tpaviot/pythonocc-core, https://github.com/tpaviot/pythonocc-core/releases/tag/7.7.2)
+- occt = 7.7.2 (more info here: https://github.com/tpaviot/pythonocc-core, https://github.com/tpaviot/pythonocc-core/releases/tag/7.7.2)
 
 To test a single CAD model with a trained network model and save a STEP file with the predicted labels, the `test_and_save.py` script can be used.
 A directory of STEP files can be viewed using the `visualizer.py` script, in which each label has a unique color.
