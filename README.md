@@ -42,6 +42,3 @@ Please cite this work if used in your research:
       Volume = {147}
       URL = {https://www.sciencedirect.com/science/article/abs/pii/S0010448522000240}
     }
-
-## Funding
-This project was funded through DfE funding.
