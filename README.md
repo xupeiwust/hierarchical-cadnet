@@ -14,7 +14,7 @@ It is a deep learning approach to learn machining features from CAD models. To a
 - Scikit-learn >= 0.23.2
 
 ## Instructions
-- Generate hierarchical B-Rep graphs and batches using code in this repo: https://gitlab.com/qub_femg/machine-learning/hierarchical-brep-graphs
+- Generate hierarchical B-Rep graphs and batches using code in this repo: https://github.com/wadaniel/hierarchical-brep-graphs/tree/main
 - Place hdf5 dataset files in */data* folder.
 - To train Hierarchical CADNet (Edge) which uses edge convexity information run **train_edge.py**, set data type, dataloader file locations.
 - To train Hierarchical CADNet (Adj) which uses only adjacency information run **train_adj.py**, set data type, dataloader file locations.
