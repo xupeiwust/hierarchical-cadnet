@@ -29,13 +29,14 @@ if __name__ == '__main__':
     num_classes = 25
     num_layers = 6
     units = 512
+    num_epochs = 100
     learning_rate = 1e-2
     dropout_rate = 0.3
-    checkpoint_path = "checkpoint/lr_0.01_adj_lvl_6_MFCAD++_units_512_date_2022-02-17_epochs_100.ckpt"
+    date_str="2023-11-17"
+    checkpoint_path = f'checkpoint/adj_lvl_{num_layers}_units_{units}_epochs_{num_epochs}_date_{date_str}.ckpt'
     test_set_path = "data/test_MFCAD++.h5"
 
     model = HierGCNN(units=units, rate=dropout_rate, num_classes=num_classes, num_layers=num_layers)
-    optimizer = tf.keras.optimizers.Adam()
     loss_fn = tf.keras.losses.CategoricalCrossentropy()
 
     test_loss_metric = tf.keras.metrics.Mean()
