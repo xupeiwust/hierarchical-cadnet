@@ -14,7 +14,7 @@ It is a deep learning approach to learn machining features from CAD models. To a
 - Scikit-learn >= 0.23.2
 
 ## Instructions
-- Generate hierarchical B-Rep graphs and batches using code in this repo: https://gitlab.com/qub_femg/machine-learning/hierarchical-brep-graphs
+- Generate hierarchical B-Rep graphs and batches using code in this repo: https://github.com/wadaniel/hierarchical-brep-graphs/tree/main
 - Place hdf5 dataset files in */data* folder.
 - To train Hierarchical CADNet (Edge) which uses edge convexity information run **train_edge.py**, set data type, dataloader file locations.
 - To train Hierarchical CADNet (Adj) which uses only adjacency information run **train_adj.py**, set data type, dataloader file locations.
@@ -22,8 +22,8 @@ It is a deep learning approach to learn machining features from CAD models. To a
 
 ## Visualization
 There is a basic CAD viewer provided. To use it additional Python packages are required (PythonOCC):
-- pythonocc-core >= 7.4.1 (more info here: https://github.com/tpaviot/pythonocc-core)
-- occt >= 7.4.0 (more info here: https://github.com/tpaviot/pythonocc-core)
+- pythonocc-core = 7.7.2 (more info here: https://github.com/tpaviot/pythonocc-core, https://github.com/tpaviot/pythonocc-core/releases/tag/7.7.2)
+- occt = 7.7.2 (more info here: https://github.com/tpaviot/pythonocc-core, https://github.com/tpaviot/pythonocc-core/releases/tag/7.7.2)
 
 To test a single CAD model with a trained network model and save a STEP file with the predicted labels, the `test_and_save.py` script can be used.
 A directory of STEP files can be viewed using the `visualizer.py` script, in which each label has a unique color.
@@ -42,6 +42,3 @@ Please cite this work if used in your research:
       Volume = {147}
       URL = {https://www.sciencedirect.com/science/article/abs/pii/S0010448522000240}
     }
-
-## Funding
-This project was funded through DfE funding.
