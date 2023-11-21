@@ -275,13 +275,12 @@ def triangulation_from_face(face, face_tag, work_facets, work_nodes, facet_face_
     aTriangulation = BRep_Tool().Triangulation(face, aLoc)
     aTrsf = aLoc.Transformation()
 
-    aNodes = aTriangulation.Nodes()
     aTriangles = aTriangulation.Triangles()
 
     node_link = {}
 
     for i in range(1, aTriangulation.NbNodes() + 1):
-        node = aNodes.Value(i)
+        node = aTriangulation.Node(i)
         node.Transform(aTrsf)
         node_tag = len(work_nodes)
         work_nodes[node_tag] = np.array([node.X(), node.Y(), node.Z()])
@@ -574,6 +573,7 @@ def read_step_with_labels(filename):
             nameid = name
             id_map.append(int(nameid))
 
+
     return shape, id_map, topo
 
 
@@ -595,6 +595,7 @@ def create_hier_graphs(step_path, with_labels=False):
     work_faces, work_edges, faces = get_brep_information(shape)
     facet_dict, edge_facet_link, facet_face_link, node_dict = get_mesh_information(shape)
     graph = get_graph(work_faces, facet_dict, work_edges, edge_facet_link)
+
 
     return graph, shape, labels
 
@@ -631,8 +632,8 @@ def test_step(x):
 if __name__ == '__main__':
     with_labels = True
     step_dir = "data/"
-    step_name = "1_true"
-    checkpoint_path = "checkpoint/MF_CAD++_residual_lvl_7_edge_MFCAD++_units_512_date_2021-07-27_epochs_100.ckpt"
+    step_name = "127"
+    checkpoint_path = "checkpoint/edge_lvl_6_units_512_epochs_100_date_2023-11-16.ckpt"
     num_classes = 25
     num_layers = 7
     units = 512
@@ -651,5 +652,4 @@ if __name__ == '__main__':
         labels = np.array(labels)
         print(f"Predictions: {y_pred}")
         print(f"True labels: {labels}")
-
         print(f"Acc: {np.sum(np.where(y_pred == labels, 1, 0)) / labels.shape[0]}")
