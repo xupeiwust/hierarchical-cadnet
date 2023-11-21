@@ -40,7 +40,7 @@ if __name__ == '__main__':
     train_set_path = "data/training_MFCAD++.h5"
     val_set_path = "data/val_MFCAD++.h5"
 
-    save_name = f'edge_lvl_{num_layers}_units_{units}_epochs_{num_epochs}_date_{dt.datetime.now().strftime("%Y-%m-%d")}'
+    save_name = f'adj_lvl_{num_layers}_units_{units}_epochs_{num_epochs}_date_{dt.datetime.now().strftime("%Y-%m-%d")}'
 
     model = HierGCNN(units=units, rate=dropout_rate, num_classes=num_classes, num_layers=num_layers)
     loss_fn = tf.keras.losses.CategoricalCrossentropy()
@@ -119,4 +119,3 @@ if __name__ == '__main__':
 
     print(f"Epoch={max_epoch+1}, Max train acc={max_train_acc}, Max val acc={max_val_acc}")
     print(f"Train loss={min_train_loss}, Val loss={min_val_loss}")
-
