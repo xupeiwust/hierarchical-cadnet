@@ -9,7 +9,7 @@ import os
 
 from collections import defaultdict
 
-from OCC.Core.STEPConstruct import stepconstruct_FindEntity
+from OCC.Core.STEPConstruct import stepconstruct
 from OCC.Core.TCollection import TCollection_HAsciiString
 from OCC.Extend.DataExchange import read_step_file, STEPControl_Reader, STEPControl_Writer, STEPControl_AsIs
 from OCC.Extend.DataExchange import STEPControl_Reader
@@ -25,7 +25,7 @@ from OCC.Core.TopAbs import TopAbs_FORWARD, TopAbs_REVERSED
 from OCC.Core.BRepAdaptor import BRepAdaptor_Surface
 from OCC.Core.BRepGProp import brepgprop
 from OCC.Core.GProp import GProp_GProps
-from OCC.Core.TopoDS import topods_Face
+from OCC.Core.TopoDS import topods
 from OCC.Core.gp import gp_Vec
 from OCC.Core._BRepGProp import brepgprop_SurfaceProperties
 from OCC.Core.BRep import BRep_Tool
@@ -118,7 +118,7 @@ def ask_point_normal_face(uv, face):
     """
     Ask the normal vector of a point given the uv coordinate of the point on a face
     """
-    face_ds = topods_Face(face)
+    face_ds = topods.Face(face)
     surface = BRep_Tool().Surface(face_ds)
     props = GeomLProp_SLProps(surface, uv[0], uv[1], 1, 1e-6)
 
@@ -612,7 +612,7 @@ def write_step_wth_prediction(filename, shape, prediction):
 
     counter = 0
     for face in faces:
-        item = stepconstruct_FindEntity(finderp, face, loc)
+        item = stepconstruct.FindEntity(finderp, face, loc)
         if item is None:
             print(face)
             continue
