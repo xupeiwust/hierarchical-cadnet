@@ -62,8 +62,6 @@ def read_step_with_labels(filename):
 
     return shape, id_map
 
-
-
 def display():
     global shape_index
     global shape_paths
@@ -84,7 +82,6 @@ def display():
     occ_display.FitAll()
 
     print(f"STEP: {shape_paths[shape_index]}")
-
 
 def show_first():
     global shape_index
@@ -127,10 +124,11 @@ def show_random():
 if __name__ == '__main__':
 
     # User Defined
-    dataset_dir = "data"
+    #dataset_dir = "data"
+    dataset_dir = "more_data"
 
-    """
     colors = {name: Quantity_Color(COLORS[name]) for name in COLORS}
+    """
     for colorname in colors:
         c = colors[colorname].Rgb()
         r = c.r()*255
