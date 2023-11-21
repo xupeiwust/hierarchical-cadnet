@@ -7,6 +7,7 @@ import os
 import random
 import glob
 
+from colr import color
 from OCC.Core.Quantity import Quantity_NOC_WHITE, Quantity_Color
 from OCC.Extend.TopologyUtils import TopologyExplorer
 from OCC.Core.STEPControl import STEPControl_Reader
@@ -30,7 +31,6 @@ COLORS = {"Chamfer": 0, "Through hole": 490, "Triangular passage": 500, "Rectang
                 "Triangular pocket": 280, "Rectangular pocket": 300, "6-sides pocket": 320, "Circular end pocket": 340,
                 "Rectangular blind slot": 360, "Vertical circular end blind slot": 380, "Horizontal circular end blind slot": 400,
                 "Triangular blind step": 420, "Circular blind step": 440, "Rectangular blind step": 460, "Round": 480, "Stock": 60}
-
 
 def read_step_with_labels(filename):
     """Reads STEP file with labels on each B-Rep face."""
@@ -125,12 +125,22 @@ def show_random():
 
 
 if __name__ == '__main__':
+
     # User Defined
-    dataset_dir = "step"
+    dataset_dir = "data"
 
+    """
     colors = {name: Quantity_Color(COLORS[name]) for name in COLORS}
+    for colorname in colors:
+        c = colors[colorname].Rgb()
+        r = c.r()*255
+        g = c.g()*255
+        b = c.b()*255
+        print(r,g,b)
+        #print(color('Hello there.', fore=(r, g, b), back=(0, 0, 0)))
+    """
 
-    occ_display, start_occ_display, add_menu, add_function_to_menu = init_display()
+    occ_display, start_occ_display, add_menu, add_function_to_menu = init_display("pyqt6")
 
     add_menu('explore')
     add_function_to_menu('explore', show_random)
