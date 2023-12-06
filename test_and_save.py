@@ -634,8 +634,10 @@ if __name__ == '__main__':
     #step_dir = "data/"
     #step_name = "127"
     with_labels = False
-    step_dir = "data_suter/"
-    step_name = "004-15944-2_pressure_plate_MT09_18"
+    #step_dir = "data_suter/"
+    #step_name = "004-15944-2_pressure_plate_MT09_18"
+    step_dir = "data_misc/"
+    step_name = "sheetMetal.step"
     checkpoint_path = "checkpoint/edge_lvl_6_units_512_epochs_100_date_2023-11-16.ckpt"
     num_classes = 25
     num_layers = 7
