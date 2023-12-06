@@ -126,7 +126,8 @@ if __name__ == '__main__':
     # User Defined
     #dataset_dir = "data"
     #dataset_dir = "more_data"
-    dataset_dir = "data_suter"
+    #dataset_dir = "data_suter"
+    dataset_dir = "data_misc"
 
     colors = {name: Quantity_Color(COLORS[name]) for name in COLORS}
     """
