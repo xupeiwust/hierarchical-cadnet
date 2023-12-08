@@ -41,6 +41,7 @@ def display():
     occ_display.View_Iso()
     occ_display.FitAll()
 
+
 def show_first():
     global shape_index
     shape_index = 0
@@ -77,16 +78,27 @@ def show_random():
     shape_index = random.randrange(0, len(shape_paths))
     display()
 
+def recognize_clicked(shp, *kwargs):
+    """ This is the function called every time
+    a face is clicked in the 3d view
+    """
+
+    for shape in shp:
+        print("Face selected: ", shape)
+        print("Face selected: ", shape.Location().HashCode(10000))
 
 if __name__ == '__main__':
 
     # User Defined
-    #dataset_dir = "data"
+    dataset_dir = "data"
     #dataset_dir = "more_data"
     #dataset_dir = "data_suter"
-    dataset_dir = "data_misc"
+    #dataset_dir = "data_misc"
 
     occ_display, start_occ_display, add_menu, add_function_to_menu = init_display("pyqt6")
+    
+    occ_display.SetSelectionModeVertex() # This is the required function
+    occ_display.register_select_callback(recognize_clicked)
 
     add_menu('explore')
     add_function_to_menu('explore', show_random)
