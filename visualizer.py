@@ -150,9 +150,6 @@ if __name__ == '__main__':
     add_function_to_menu('explore', show_last)
 
     shape_paths = glob.glob(os.path.join(dataset_dir, '*.step'))
-
-    print(len(shape_paths), 'shapes')
-
     if len(shape_paths) > 0:
         show_random()
 
